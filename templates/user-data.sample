@@ -2,12 +2,6 @@
 
 coreos:
   etcd:
-    # generate a new token for each unique cluster from https://discovery.etcd.io/new
-    # WARNING: replace each time you 'vagrant destroy'
-    #discovery: https://discovery.etcd.io/<token>
-    addr: $public_ipv4:4001
-    peer-addr: $public_ipv4:7001
-  etcd2:
     #generate a new token for each unique cluster from https://discovery.etcd.io/new
     #discovery: https://discovery.etcd.io/<token>
     # multi-region and multi-cloud deployments need to use $public_ipv4
@@ -24,10 +18,6 @@ coreos:
   units:
     - name: etcd.service
       command: start
-    # To use etcd2, comment out the above service and uncomment these
-    # Note: this requires a release that contains etcd2
-    #- name: etcd2.service
-    #  command: start
     - name: fleet.service
       command: start
     - name: docker-tcp.socket
