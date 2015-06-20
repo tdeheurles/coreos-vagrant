@@ -1,5 +1,29 @@
 # CoreOS Vagrant
 
+
+## How to
+- Copy `template/user-data.sample` and `template/config.sample.rb` to `user-data` and `config.rb`
+- Go to the fresh `config.rb` and choose your parameters
+- run a `cmd.exe in admin mode` and go to the project folder
+- `vagrant up`
+- then ssh in :
+
+  You can `vagrant ssh`
+
+  Or use **Putty**. For putty you will have to [download/install](http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html) `PuTTY and PuTTYgen` (download the win installer). Then generate a putty key from the vagrant key `C:\Users\username\.vagrant.d\insecure_private_key` with PuTTYgen (Load -> Path -> Save).
+
+  Launch `PuTTY`. Go to `Connection->SSH->Auth` browse to add your key (the .ppk one), then go to Session and give Host Name core@127.0.0.1. Add a name in Saved Sessions and save it.
+
+  Launch your session and add a shortcut with `rightClick on windows running icon -> Pin`.
+
+  Now all your new Vagrant should be easily joined
+
+
+- For shared folders, after vagrant up, run `vagrant rsync-auto` to continuously update the rsync.
+- If you want to use docker from windows, you will need to `set DOCKER_HOST=tcp://127.0.0.1:2375` in cmd.exe (maybe a [boot2docker](http://boot2docker.io/) installation is needed. Look the [docker helper](https://github.com/tdeheurles/docs/tree/master/docker))
+
+## From Original Fork (not updated with this changes)
+
 This repo provides a template Vagrantfile to create a CoreOS virtual machine using the VirtualBox software hypervisor.
 After setup is complete you will have a single CoreOS virtual machine running on your local machine.
 

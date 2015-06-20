@@ -18,8 +18,36 @@ $share_home = false
 $vm_gui = false
 $vm_memory = 1024
 $vm_cpus = 1
-$shared_folders = {}
+$linux_shared_folders = {}
+$windows_shared_folders = {}
 $forwarded_ports = {}
+
+
+# Tricks for sharing folder with cygwin.rsync
+ENV["VAGRANT_DETECTED_OS"] = ENV["VAGRANT_DETECTED_OS"].to_s + " cygwin"
+
+
+# reset discoveryUrl as CoreOs is used alone
+$new_discovery_url="https://discovery.etcd.io/new?size=#{$num_instances}"
+
+if File.exists?('user-data') && ARGV[0].eql?('up')
+ require 'open-uri'
+ require 'yaml'
+
+ token = open($new_discovery_url).read
+
+ data = YAML.load(IO.readlines('user-data')[1..-1].join)
+ if data['coreos'].key? 'etcd'
+   data['coreos']['etcd']['discovery'] = token
+ end
+ if data['coreos'].key? 'etcd2'
+   data['coreos']['etcd2']['discovery'] = token
+ end
+
+ yaml = YAML.dump(data)
+ File.open('user-data', 'w') { |file| file.write("#cloud-config\n\n#{yaml}") }
+end
+
 
 # Attempt to apply the deprecated environment variable NUM_INSTANCES to
 # $num_instances while allowing config.rb to override it
@@ -47,7 +75,11 @@ end
 Vagrant.configure("2") do |config|
   # always use Vagrants insecure key
   config.ssh.insert_key = false
+  config.ssh.username
 
+
+  # IMAGE
+  # =====
   config.vm.box = "coreos-%s" % $update_channel
   if $image_version != "current"
       config.vm.box_version = $image_version
@@ -66,55 +98,50 @@ Vagrant.configure("2") do |config|
     config.vbguest.auto_update = false
   end
 
-  (1..$num_instances).each do |i|
-    config.vm.define vm_name = "%s-%02d" % [$instance_name_prefix, i] do |config|
-      config.vm.hostname = vm_name
+  config.vm.define vm_name = $instance_name_prefix do |config|
+    config.vm.hostname = vm_name
 
-      # if $enable_serial_logging
-      #   logdir = File.join(File.dirname(__FILE__), "log")
-      #   FileUtils.mkdir_p(logdir)
-      #
-      #   serialFile = File.join(logdir, "%s-serial.txt" % vm_name)
-      #   FileUtils.touch(serialFile)
-      #
-      #   config.vm.provider :virtualbox do |vb, override|
-      #     vb.customize ["modifyvm", :id, "--uart1", "0x3F8", "4"]
-      #     vb.customize ["modifyvm", :id, "--uartmode1", serialFile]
-      #   end
-      # end
 
-      if $expose_docker_tcp
-        config.vm.network "forwarded_port", guest: 2375, host: ($expose_docker_tcp + i - 1), auto_correct: true
-      end
-
-      $forwarded_ports.each do |guest, host|
-        config.vm.network "forwarded_port", guest: guest, host: host, auto_correct: true
-      end
-
-      config.vm.provider :virtualbox do |vb|
-        vb.gui = vm_gui
-        vb.memory = vm_memory
-        vb.cpus = vm_cpus
-      end
-
-      ip = "172.17.8.#{i+100}"
-      config.vm.network :private_network, ip: ip
-
-      # Uncomment below to enable NFS for sharing the host machine into the coreos-vagrant VM.
-      #config.vm.synced_folder ".", "/home/core/share", id: "core", :nfs => true, :mount_options => ['nolock,vers=3,udp']
-      $shared_folders.each_with_index do |(host_folder, guest_folder), index|
-        config.vm.synced_folder host_folder.to_s, guest_folder.to_s, id: "core-share%02d" % index, nfs: true, mount_options: ['nolock,vers=3,udp']
-      end
-
-      if $share_home
-        config.vm.synced_folder ENV['HOME'], ENV['HOME'], id: "home", :nfs => true, :mount_options => ['nolock,vers=3,udp']
-      end
-
-      if File.exist?(CLOUD_CONFIG_PATH)
-        config.vm.provision :file, :source => "#{CLOUD_CONFIG_PATH}", :destination => "/tmp/vagrantfile-user-data"
-        config.vm.provision :shell, :inline => "mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/", :privileged => true
-      end
-
+    # NETWORK
+    # =======
+    if $expose_docker_tcp
+      config.vm.network "forwarded_port", guest: 2375, host: $expose_docker_tcp, auto_correct: true
     end
+
+    $forwarded_ports.each do |guest, host|
+      config.vm.network "forwarded_port", guest: guest, host: host, auto_correct: true
+    end
+
+    config.vm.provider :virtualbox do |vb|
+      vb.gui = vm_gui
+      vb.memory = vm_memory
+      vb.cpus = vm_cpus
+    end
+
+    ip = "172.16.0.10"
+    config.vm.network :private_network, ip: ip
+
+
+    # SHARED FOLDERS
+    # ==============
+    # Uncomment below to enable NFS for sharing the host machine into the coreos-vagrant VM.
+    #config.vm.synced_folder ".", "/home/core/share", id: "core", :nfs => true, :mount_options => ['nolock,vers=3,udp']
+    #$linux_shared_folders.each_with_index do |(host_folder, guest_folder), index|
+    #  config.vm.synced_folder host_folder.to_s, guest_folder.to_s, id: "core-share%02d" % index, nfs: true, mount_options: ['nolock,vers=3,udp']
+    #end
+
+    $windows_shared_folders.each_with_index do |(host_folder, guest_folder), index|
+      config.vm.synced_folder host_folder.to_s, guest_folder.to_s, id: "core", type: "rsync", rsync__auto: true
+    end
+
+    #if $share_home
+    #  config.vm.synced_folder ENV['HOME'], ENV['HOME'], id: "home", :nfs => true, :mount_options => ['nolock,vers=3,udp']
+    #end
+
+    if File.exist?(CLOUD_CONFIG_PATH)
+      config.vm.provision :file, :source => "#{CLOUD_CONFIG_PATH}", :destination => "/tmp/vagrantfile-user-data"
+      config.vm.provision :shell, :inline => "mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/", :privileged => true
+    end
+
   end
 end
