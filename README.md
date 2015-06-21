@@ -25,7 +25,7 @@
 - I started some documentation [here](https://github.com/tdeheurles/docs/tree/master/cygwin) to use cygwin instead of cmd.exe
 
 ### Config gcloud && kubectl
-CHeck :
+Check :
 - You are now inside you're CoreOs. You are the user `core`.
 - Control that docker is ok with a `docker ps`
 
@@ -61,9 +61,9 @@ kst        k8s status             opt: namespace name   Give service/rc/pods fro
 ```
 
 1. So first log using `glogin`. It will give you an URL that you will copy/paste to your browser, and get back the token.
-2. Then we will set the project we will use : `gsp epsilon-cloud-rnd jenkins`
-3. Finally we get the credentials for a cluster in the project `ggc cloud-rnd`
-4. Then we will control that everything is ok by getting some status information : `kst`
+2. Then set the project to use : `gsp epsilon-cloud-rnd jenkins`
+3. Get the credentials for a cluster in the project `ggc cloud-rnd`
+4. Finally we will control that everything is ok by getting some status information : `kst`
 
 
 ## From Original Fork (not updated with this changes)
