@@ -1,7 +1,8 @@
 # CoreOS Vagrant
 
-
 ## How to
+
+### Go into the Core
 - Copy `template/user-data.sample` and `template/config.sample.rb` to `user-data` and `config.rb`
 - Go to the fresh `config.rb` and choose your parameters
 - run a `cmd.exe in admin mode` and go to the project folder
@@ -21,6 +22,27 @@
 
 - For shared folders, after vagrant up, run `vagrant rsync-auto` to continuously update the rsync.
 - If you want to use docker from windows, you will need to `set DOCKER_HOST=tcp://127.0.0.1:2375` in cmd.exe (maybe a [boot2docker](http://boot2docker.io/) installation is needed. Look the [docker helper](https://github.com/tdeheurles/docs/tree/master/docker))
+- I started some documentation [here](https://github.com/tdeheurles/docs/tree/master/cygwin) to use cygwin instead of cmd.exe
+
+### Config gcloud && kubectl
+Control :
+- You are now inside you're CoreOs. You are the user `core`.
+- Control that docker is ok with a `docker ps`
+
+Now we get in gcloud using the [gcloud-tools](https://github.com/tdeheurles/gcloud-tools) container. I added some functions and alias (shortcuts) to simplify the usage.
+
+Here are some :
+
+command    meaning                args                  function
+-------    -------                ----                  --------
+glogin                            None                  will do the authentication process. You will need a browser and two copy/paste. This is done only one time
+gsp        set project            project name          You need to do this each time you switch gcloud project
+ggc        get credentials        cluster name          This will get credentials for the cluster
+kcv        k8s config view        None                  Give the list of available cluster (with credentials already taken)
+gfor       forwarding-rules       None                  Get the forwarding-rules
+gfir       firewall-rules         None                  Get firewall-rules
+kst        k8s status             opt: namespace name   Give service/rc/pods from a namespace (default if no argument)
+
 
 ## From Original Fork (not updated with this changes)
 
