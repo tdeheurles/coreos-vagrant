@@ -33,17 +33,31 @@ Now we get in gcloud using the [gcloud-tools](https://github.com/tdeheurles/gclo
 
 Here are some :
 
--------    -------                ----                  --------
+---------  ---------------------  --------------------  ------------------------------------
 command    meaning                args                  function
--------    -------                ----                  --------
-glogin                            None                  will do the authentication process. You will need a browser and two copy/paste. This is done only one time
-gsp        set project            project name          You need to do this each time you switch gcloud project
-ggc        get credentials        cluster name          This will get credentials for the cluster
-kcv        k8s config view        None                  Give the list of available cluster (with credentials already taken)
+---------  ---------------------  --------------------  ------------------------------------
+glogin     google login           None                  will do the authentication process.
+                                                        You will need a browser and two
+                                                        copy/paste. This is done only one
+                                                        time
+
+gsp        set project            project name          You need to do this each time you
+                                                        switch gcloud project
+
+ggc        get credentials        cluster name          This will get credentials for the
+                                                        cluster
+
+kcv        k8s config view        None                  Give the list of available cluster
+                                                        (with credentials already taken)
+
 gfor       forwarding-rules       None                  Get the forwarding-rules
+
 gfir       firewall-rules         None                  Get firewall-rules
-kst        k8s status             opt: namespace name   Give service/rc/pods from a namespace (default if no argument)
--------    -------                ----                  --------
+
+kst        k8s status             opt: namespace name   Give service/rc/pods from a namespace
+                                                        (default if no argument)
+---------  ---------------------  --------------------  ------------------------------------
+
 
 ## From Original Fork (not updated with this changes)
 
