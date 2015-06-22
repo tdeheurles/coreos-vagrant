@@ -145,7 +145,8 @@ Vagrant.configure("2") do |config|
 
 
     # BASHRC
-    
+    config.vm.provision :shell, :inline => "rm /home/core/.bashrc"
+    config.vm.provision :file, :source => "templates/.bashrc ", :destination => "/home/core/.bashrc"
 
   end
 end

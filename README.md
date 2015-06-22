@@ -37,26 +37,45 @@ Here are some :
 ---------  ---------------------  --------------------  ------------------------------------
 command    meaning                args                  function
 ---------  ---------------------  --------------------  ------------------------------------
+                             AUTHENTICATION ETC
 glogin     google login           None                  will do the authentication process.
-                                                        You will need a browser and two
-                                                        copy/paste. This is done only one
-                                                        time
+                                                           You will need a browser and two
+                                                           copy/paste. This is done only one
+                                                           time
 
 gsp        set project            project name          You need to do this each time you
-                                                        switch gcloud project
+                                                           switch gcloud project
 
 ggc        get credentials        cluster name          This will get credentials for the
-                                                        cluster
+                                                           cluster
 
+                       -----------------------------------
+                                     STATUS
 kcv        k8s config view        None                  Give the list of available cluster
-                                                        (with credentials already taken)
+                                                           (with credentials already taken)
 
 gfor       forwarding-rules       None                  Get the forwarding-rules
 
 gfir       firewall-rules         None                  Get firewall-rules
 
 kst        k8s status             opt: namespace name   Give service/rc/pods from a namespace
-                                                        (default if no argument)
+                                                           (default if no argument)
+
+                       -----------------------------------
+                                     WORK ON
+kscale     kubectl scale          rc name               Change the number of running pods
+                                  scale quantity           for a replication controller
+
+
+                       -----------------------------------
+                                     DOCKER
+dps        docekr ps              None                  see docker running containers
+
+dpsa       docekr ps -A           None                  see docker running and runned
+                                                            containers
+
+dim        docker images          None                  See docker images
+
 ---------  ---------------------  --------------------  ------------------------------------
 ```
 

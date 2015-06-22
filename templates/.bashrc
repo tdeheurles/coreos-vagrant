@@ -4,7 +4,7 @@
 # - To update your bashrc you can run uprc
 
 # update .bashrc
-alias uprc="cat < /repository/coreos-vagrant/templates/.bashrc.template > ~/.bashrc && exec -l $SHELL"
+alias uprc="cat < /repository/coreos-vagrant/templates/.bashrc > ~/.bashrc && exec -l $SHELL"
 
 # ls
 alias l="ls -lthg --color"
@@ -15,6 +15,11 @@ alias ct="clear && pwd"
 
 # Edit .bashrc
 alias edb="vi ~/.bashrc"
+
+# DOCKER
+alias dps="docker ps"
+alias dpsa="docker ps -a"
+alias dim="docker images"
 
 # GCLOUD
 kube_default_zone="europe-west1-b"
@@ -46,16 +51,23 @@ function kst {
     && gt "kubectl get pods $namespace"
 }
 
+
 # Set gcloud project to argument
 function gsp {
   gt "gcloud config set project $1"
 }
+
 
 # Get credentials for kubectl
 function ggc {
   gt "gcloud alpha container get-credentials --zone=$kube_default_zone --cluster=$1"
 }
 
+
+# to scale replicas of a RC
+function gscale {
+  gt "kubectl scale --replicas=$2 rc $1"
+}
 
 alias gfor="gt \"gcloud compute forwarding-rules list\""
 alias gfir="gt \"gcloud compute firewall-rules list\""
