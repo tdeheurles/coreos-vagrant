@@ -6,6 +6,7 @@ require 'fileutils'
 Vagrant.require_version ">= 1.6.0"
 
 CLOUD_CONFIG_PATH = File.join(File.dirname(__FILE__), "user-data")
+BASHRC = File.join(File.dirname(__FILE__), "templates/.bashrc")
 CONFIG = File.join(File.dirname(__FILE__), "config.rb")
 
 # Defaults for config options defined in CONFIG
@@ -23,8 +24,29 @@ $windows_shared_folders = {}
 $forwarded_ports = {}
 
 
+module OS
+  def OS.windows?
+    (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
+  end
+
+  def OS.mac?
+   (/darwin/ =~ RUBY_PLATFORM) != nil
+  end
+
+  def OS.unix?
+    !OS.windows?
+  end
+
+  def OS.linux?
+    OS.unix? and not OS.mac?
+  end
+end
+
+
 # Tricks for sharing folder with cygwin.rsync
-ENV["VAGRANT_DETECTED_OS"] = ENV["VAGRANT_DETECTED_OS"].to_s + " cygwin"
+if OS.windows?
+  ENV["VAGRANT_DETECTED_OS"] = ENV["VAGRANT_DETECTED_OS"].to_s + " cygwin"
+end
 
 
 # reset discoveryUrl as CoreOs is used alone
@@ -126,17 +148,18 @@ Vagrant.configure("2") do |config|
     # ==============
     # Uncomment below to enable NFS for sharing the host machine into the coreos-vagrant VM.
     #config.vm.synced_folder ".", "/home/core/share", id: "core", :nfs => true, :mount_options => ['nolock,vers=3,udp']
-    #$linux_shared_folders.each_with_index do |(host_folder, guest_folder), index|
-    #  config.vm.synced_folder host_folder.to_s, guest_folder.to_s, id: "core-share%02d" % index, nfs: true, mount_options: ['nolock,vers=3,udp']
-    #end
-    #if $share_home
-    #  config.vm.synced_folder ENV['HOME'], ENV['HOME'], id: "home", :nfs => true, :mount_options => ['nolock,vers=3,udp']
-    #end
-
-    $windows_shared_folders.each_with_index do |(host_folder, guest_folder), index|
-      config.vm.synced_folder host_folder.to_s, guest_folder.to_s, id: "core", type: "rsync", rsync__auto: true
+    if OS.unix?
+      $linux_shared_folders.each_with_index do |(host_folder, guest_folder), index|
+       config.vm.synced_folder host_folder.to_s, guest_folder.to_s, id: "core-share%02d" % index, nfs: true, mount_options: ['nolock,vers=3,udp']
+      end
+      if $share_home
+       config.vm.synced_folder ENV['HOME'], ENV['HOME'], id: "home", :nfs => true, :mount_options => ['nolock,vers=3,udp']
+      end
+    elsif OS.windows?
+      $windows_shared_folders.each_with_index do |(host_folder, guest_folder), index|
+        config.vm.synced_folder host_folder.to_s, guest_folder.to_s, id: "core", type: "rsync", rsync__auto: true
+      end
     end
-
 
     if File.exist?(CLOUD_CONFIG_PATH)
       config.vm.provision :file, :source => "#{CLOUD_CONFIG_PATH}", :destination => "/tmp/vagrantfile-user-data"
@@ -146,7 +169,7 @@ Vagrant.configure("2") do |config|
 
     # BASHRC
     config.vm.provision :shell, :inline => "rm /home/core/.bashrc"
-    config.vm.provision :file, :source => "templates/.bashrc ", :destination => "/home/core/.bashrc"
+    config.vm.provision :file, :source => "templates/.bashrc", :destination => "/home/core/.bashrc"
 
   end
 end
