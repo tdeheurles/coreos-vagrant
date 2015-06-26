@@ -1,4 +1,3 @@
-
 # Instructions
 # - Use space if you want to indent
 # - To update your bashrc you can run uprc
