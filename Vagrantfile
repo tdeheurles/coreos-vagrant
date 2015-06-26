@@ -148,12 +148,14 @@ Vagrant.configure("2") do |config|
     # ==============
     # Uncomment below to enable NFS for sharing the host machine into the coreos-vagrant VM.
     #config.vm.synced_folder ".", "/home/core/share", id: "core", :nfs => true, :mount_options => ['nolock,vers=3,udp']
-    if OS.unix?
+    if OS.linux?
       $linux_shared_folders.each_with_index do |(host_folder, guest_folder), index|
-       config.vm.synced_folder host_folder.to_s, guest_folder.to_s, id: "core-share%02d" % index, nfs: true, mount_options: ['nolock,vers=3,udp']
+       #config.vm.synced_folder host_folder.to_s, guest_folder.to_s, id: "core-share%02d" % index, nfs: true, mount_options: ['nolock,vers=3,udp']
+       config.vm.synced_folder host_folder.to_s, guest_folder.to_s, id: "core-share%02d" % index, type: "rsync", rsync__auto: true
       end
       if $share_home
-       config.vm.synced_folder ENV['HOME'], ENV['HOME'], id: "home", :nfs => true, :mount_options => ['nolock,vers=3,udp']
+       #config.vm.synced_folder ENV['HOME'], ENV['HOME'], id: "home", :nfs => true, :mount_options => ['nolock,vers=3,udp']
+       config.vm.synced_folder ENV['HOME'], ENV['HOME'], id: "home", type: "rsync", rsync__auto: true
       end
     elsif OS.windows?
       $windows_shared_folders.each_with_index do |(host_folder, guest_folder), index|

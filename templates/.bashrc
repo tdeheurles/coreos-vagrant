@@ -24,6 +24,7 @@ alias dim="docker images"
 # GCLOUD
 kube_default_zone="europe-west1-b"
 
+# main function for running docker gcloud
 function gt {
   docker run                                         \
     --rm                                             \
