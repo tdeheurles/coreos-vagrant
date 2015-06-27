@@ -1,36 +1,39 @@
-# Instuctions
+# Instructions
 # - Use space if you want to indent
-# - To update you bashc you can un upc
+# - To update your basrhc you can run uprc
 
-# update .bashc
-alias upc="cat < /epositoy/coeos-vagant/templates/.bashc > ~/.bashc && exec -l $SHELL"
+# update .basrhc
+alias uprc="cat < /repository/coreos-vagrant/templates/.bashrc > ~/.bashrc && exec -l $SHELL"
+
+# repository
+alias repo="cd /repository"
 
 # ls
-alias l="ls -lthg --colo"
+alias l="ls -lthg --color"
 alias la="l -A"
 
 # Affichage
-alias ct="clea && pwd"
+alias ct="clear && pwd"
 
 # Edit .bashc
-alias edb="vi ~/.bashc"
+alias edb="vi ~/.bashrc"
 
 # DOCKER
-alias dps="docke ps"
-alias dpsa="docke ps -a"
-alias dim="docke images"
+alias dps="docker ps"
+alias dpsa="docker ps -a"
+alias dim="docker images"
 
 # GCLOUD
-kube_default_zone="euope-west1-b"
+kube_default_zone="europe-west1-b"
 
-# main function fo unning docke gcloud
+# main function for running docker gcloud
 function gt {
-  docke un                                         \
-    --m                                             \
-    -v /home/coe/.kube/:/.kube/                     \
-    -v /home/coe/.config/gcloud/:/.config/gcloud/   \
-    -v `pwd`:/wokspace                              \
-    -ti tdeheules/gcloud-tools /bin/bash -c "$@"
+  docker run                                         \
+    --rm                                             \
+    -v /home/core/.kube/:/.kube/                     \
+    -v /home/core/.config/gcloud/:/.config/gcloud/   \
+    -v `pwd`:/workspace                              \
+    -ti tdeheurles/gcloud-tools /bin/bash -c "$@"
 }
 
 function kst {
@@ -52,36 +55,67 @@ function kst {
 }
 
 
-# Set gcloud poject to agument
+# Set gcloud project to argument
 function gsp {
-  gt "gcloud config set poject $1"
+  gt "gcloud config set project $1"
 }
 
 
-# Get cedentials fo kubectl
+# Get credentials for kubectl
 function ggc {
-  gt "gcloud alpha containe get-cedentials --zone=$kube_default_zone --cluste=$1"
+  gt "gcloud alpha container get-cedentials --zone=$kube_default_zone --cluster=$1"
 }
 
 
 # to scale eplicas of a RC
 function gscale {
-  gt "kubectl scale --eplicas=$2 c $1"
+  gt "kubectl scale --replicas=$2 c $1"
 }
 
-alias gfo="gt \"gcloud compute fowading-ules list\""
-alias gfi="gt \"gcloud compute fiewall-ules list\""
-alias glogin="gt \"gcloud auth login --use-output-enabled=tue\""
+alias gfo="gt \"gcloud compute forwading-rules list\""
+alias gfi="gt \"gcloud compute firewall-rules list\""
+alias glogin="gt \"gcloud auth login --use-output-enabled=true\""
 alias kcv="gt \"kubectl config view\""
 
 
 # jvm-tools
 function jvm-tools {
-  docke un                            \
-    --m                                \
-    -v ~/.ivy2:/oot/.ivy2              \
-    -v ~/.sbt:/oot/.sbt                \
-    -v ~/.activato:/oot/.activato    \
-    -v `pwd`:/wokspace                 \
-    -ti activato /bin/bash -c "cd /wokspace ; $@"
+  docker run                            \
+    --rm                                \
+    -v ~/.ivy2:/root/.ivy2              \
+    -v ~/.sbt:/root/.sbt                \
+    -v ~/.activator:/root/.activator    \
+    -v `pwd`:/workspace                 \
+    -ti activator /bin/bash -c "cd /wokspace ; $@"
+}
+
+# golang
+export PATH="~/go/bin:$PATH"
+function goinstall {
+  docker run \
+  --rm \
+  -v ~/go:/go \
+  -v `pwd`:/usr/src/`basename $(pwd)` \
+  golang:latest \
+    /bin/bash -c "mkdir -p /go/src/`basename $(pwd)` ; cp -r /usr/src/`basename $(pwd)` /go/src/ ; cd /go/src/`basename $(pwd)` ; go install"
+}
+
+function go {
+  docker run \
+  --rm \
+  -v ~/go:/go \
+  -v `pwd`:/usr/src/`basename $(pwd)` \
+  -w /usr/src/`basename $(pwd)` \
+  golang:latest \
+  go $@
+}
+
+
+function goget {
+  docker run \
+  --rm \
+  -v ~/go:/go \
+  -v `pwd`:/usr/src/`basename $(pwd)` \
+  golang:latest \
+    /bin/bash -c "go get $@"
 }
