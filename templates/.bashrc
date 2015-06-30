@@ -22,19 +22,39 @@ alias edb="vi ~/.bashrc"
 alias dps="docker ps"
 alias dpsa="docker ps -a"
 alias dim="docker images"
+alias dcc="docker rm `docker ps -a -q`"
+
+# GIT
+alias ga="git add"
+alias gaa="git add -A"
+alias gl="git pull"
+alias gp="git push"
+alias gst="git status"
+alias gcmsg="git commit -m"
 
 # GCLOUD
 kube_default_zone="europe-west1-b"
 
 # main function for running docker gcloud
-function gt {
+function gcloud-tools {
   docker run                                         \
     --rm                                             \
     -v /home/core/.kube/:/.kube/                     \
     -v /home/core/.config/gcloud/:/.config/gcloud/   \
     -v `pwd`:/workspace                              \
-    -ti tdeheurles/gcloud-tools /bin/bash -c "$@"
+    -w /workspace                                    \
+    -ti tdeheurles/gcloud-tools                      \
+   $@
 }
+
+function gcloud {
+  gcloud-tools gcloud $@
+}
+
+function kubectl {
+  gcloud-tools kubectl $@
+}
+
 
 function kst {
   if [[ -z $1 ]]; then
@@ -43,39 +63,44 @@ function kst {
     namespace="--namespace=$1"
   fi
 
-  clea                                        \
+  clear                                        \
     && echo -e "\e[92mSERVICES\e[39m"          \
-    && gt "kubectl get sevices $namespace"  \
+    && kubectl get services $namespace         \
     && echo " "                                \
     && echo -e "\e[92mRC\e[39m"                \
-    && gt "kubectl get c $namespace"        \
+    && kubectl get rc $namespace               \
     && echo " "                                \
     && echo -e "\e[92mPODS\e[39m"              \
-    && gt "kubectl get pods $namespace"
+    && kubectl get pods $namespace
 }
 
+# deploy rc & service
+function kcreate {
+  . ./config/release.cfg
+  kubectl create -f ./deploy/kubernetes/rc_latest.$template_extension -f ./deploy/kubernetes/service_latest.$template_extension
+}
+alias kstop="kubectl stop rc,service -l "
+
+# to scale eplicas of a RC
+function gscale {
+  kubectl scale --replicas=$2 rc $1
+}
 
 # Set gcloud project to argument
 function gsp {
-  gt "gcloud config set project $1"
+  gcloud config set project $1
 }
 
 
 # Get credentials for kubectl
 function ggc {
-  gt "gcloud alpha container get-cedentials --zone=$kube_default_zone --cluster=$1"
+  gcloud alpha container get-credentials --zone=$kube_default_zone --cluster=$1
 }
 
-
-# to scale eplicas of a RC
-function gscale {
-  gt "kubectl scale --replicas=$2 c $1"
-}
-
-alias gfo="gt \"gcloud compute forwading-rules list\""
-alias gfi="gt \"gcloud compute firewall-rules list\""
-alias glogin="gt \"gcloud auth login --use-output-enabled=true\""
-alias kcv="gt \"kubectl config view\""
+alias gfo="gcloud compute forwarding-rules list"
+alias gfi="gcloud compute firewall-rules list"
+alias glogin="gcloud auth login"
+alias kcv="kubectl config view"
 
 
 # jvm-tools
@@ -86,7 +111,8 @@ function jvm-tools {
     -v ~/.sbt:/root/.sbt                \
     -v ~/.activator:/root/.activator    \
     -v `pwd`:/workspace                 \
-    -ti activator /bin/bash -c "cd /wokspace ; $@"
+    -w /workspace                       \
+    -ti tdeheurles/jvm-tools /bin/bash -c "$@"
 }
 
 # golang
