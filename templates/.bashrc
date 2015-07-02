@@ -18,11 +18,14 @@ alias ct="clear && pwd"
 # Edit .bashc
 alias edb="vi ~/.bashrc"
 
+# debian
+alias debian="docker run -ti --rm debian:latest bash"
+
 # DOCKER
 alias dps="docker ps"
 alias dpsa="docker ps -a"
 alias dim="docker images"
-alias dcc="docker rm `docker ps -a -q`"
+# alias dclean="docker kill $(docker ps -q) && docker rm $(docker ps -a -q) && docker rmi $(docker images -q -f dangling=true)"
 
 # GIT
 alias ga="git add"
@@ -31,6 +34,7 @@ alias gl="git pull"
 alias gp="git push"
 alias gst="git status"
 alias gcmsg="git commit -m"
+alias gchmodx="git update-index --chmod=+x"
 
 # GCLOUD
 kube_default_zone="europe-west1-b"
@@ -99,9 +103,12 @@ function ggc {
 
 alias gfo="gcloud compute forwarding-rules list"
 alias gfi="gcloud compute firewall-rules list"
-alias glogin="gcloud auth login"
-alias kcv="kubectl config view"
 
+alias glogin="gcloud auth login"
+alias gal="gcloud auth list"
+alias gsa="gcloud config set account"
+alias kcv="echo \" \" ; gcloud config list | grep account ; gcloud config list | grep project ; kubectl config view | grep current-context ; echo \" \" ; echo -e \"\e[92mAvailable contexts\e[39m\" ; kubectl config view | egrep \"user: \" | sed s/user:/-/g ; echo \" \""
+alias kuse="kubectl config use-context"
 
 # jvm-tools
 function jvm-tools {
