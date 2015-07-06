@@ -3,9 +3,9 @@
 ## How to
 
 ### Go into the Core
-- Copy `template/user-data.sample` and `template/config.sample.rb` to `user-data` and `config.rb`
+- Copy `template/user-data.sample`, `template/config.sample.rb` and `template/synced_folders.sample.yaml` to `user-data`, `config.rb`  and `synced_folders.yaml`
 - Go to the fresh `config.rb` and choose your parameters
-- run a `cmd.exe in admin mode` and go to the project folder
+- Run a terminal and go to project folder
 - `vagrant up`
 - then ssh in :
 
@@ -20,7 +20,6 @@
   Now all your new Vagrant should be easily joined
 
 
-- For shared folders, after vagrant up, run `vagrant rsync-auto` to continuously update the rsync.
 - If you want to use docker from windows, you will need to `set DOCKER_HOST=tcp://127.0.0.1:2375` in cmd.exe (maybe a [boot2docker](http://boot2docker.io/) installation is needed. Look the [docker helper](https://github.com/tdeheurles/docs/tree/master/docker))
 - I started some documentation [here](https://github.com/tdeheurles/docs/tree/master/cygwin) to use cygwin instead of cmd.exe
 

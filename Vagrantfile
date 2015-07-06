@@ -8,6 +8,7 @@ Vagrant.require_version ">= 1.6.0"
 CLOUD_CONFIG_PATH = File.join(File.dirname(__FILE__), "user-data")
 BASHRC = File.join(File.dirname(__FILE__), "templates/.bashrc")
 CONFIG = File.join(File.dirname(__FILE__), "config.rb")
+MOUNT_POINTS = YAML::load_file('synced_folders.yaml')
 
 # Defaults for config options defined in CONFIG
 $num_instances = 1
@@ -43,11 +44,23 @@ module OS
 end
 
 
-# Tricks for sharing folder with cygwin.rsync
+required_plugins = %w(vagrant-triggers)
+
+# check either 'http_proxy' or 'HTTP_PROXY' environment variable
 if OS.windows?
-  ENV["VAGRANT_DETECTED_OS"] = ENV["VAGRANT_DETECTED_OS"].to_s + " cygwin"
+  required_plugins.push('vagrant-winnfsd')
 end
 
+required_plugins.each do |plugin|
+  need_restart = false
+  unless Vagrant.has_plugin? plugin
+    system "vagrant plugin install #{plugin}"
+    need_restart = true
+  end
+  exec "vagrant #{ARGV.join(' ')}" if need_restart
+end
+
+# for creating new instance each time
 if $internet
   reset discoveryUrl as CoreOs is used alone
   $new_discovery_url="https://discovery.etcd.io/new?size=#{$num_instances}"
@@ -146,22 +159,33 @@ Vagrant.configure("2") do |config|
 
     # SHARED FOLDERS
     # ==============
-    # Uncomment below to enable NFS for sharing the host machine into the coreos-vagrant VM.
-    #config.vm.synced_folder ".", "/home/core/share", id: "core", :nfs => true, :mount_options => ['nolock,vers=3,udp']
-    if OS.linux?
-      $linux_shared_folders.each_with_index do |(host_folder, guest_folder), index|
-       #config.vm.synced_folder host_folder.to_s, guest_folder.to_s, id: "core-share%02d" % index, nfs: true, mount_options: ['nolock,vers=3,udp']
-       config.vm.synced_folder host_folder.to_s, guest_folder.to_s, id: "core-share%02d" % index, type: "rsync", rsync__auto: true
+    begin
+      MOUNT_POINTS.each do |mount|
+        mount_options = ""
+        disabled = false
+        nfs =  true
+        if mount['mount_options']
+          mount_options = mount['mount_options']
+        end
+        if mount['disabled']
+          disabled = mount['disabled']
+        end
+        if mount['nfs']
+          nfs = mount['nfs']
+        end
+        if File.exist?(File.expand_path("#{mount['source']}"))
+          if mount['destination']
+            config.vm.synced_folder "#{mount['source']}", "#{mount['destination']}",
+              id: "#{mount['name']}",
+              disabled: disabled,
+              mount_options: ["#{mount_options}"],
+              nfs: nfs
+          end
+        end
       end
-      if $share_home
-       #config.vm.synced_folder ENV['HOME'], ENV['HOME'], id: "home", :nfs => true, :mount_options => ['nolock,vers=3,udp']
-       config.vm.synced_folder ENV['HOME'], ENV['HOME'], id: "home", type: "rsync", rsync__auto: true
-      end
-    elsif OS.windows?
-      $windows_shared_folders.each_with_index do |(host_folder, guest_folder), index|
-        config.vm.synced_folder host_folder.to_s, guest_folder.to_s, id: "core", type: "rsync", rsync__auto: true
-      end
+    rescue
     end
+
 
     if File.exist?(CLOUD_CONFIG_PATH)
       config.vm.provision :file, :source => "#{CLOUD_CONFIG_PATH}", :destination => "/tmp/vagrantfile-user-data"

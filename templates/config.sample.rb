@@ -8,33 +8,14 @@ $vm_cpus = 1
 # Set to the TCP port you want exposed on the *host* machine, default is 2375
 # If 2375 is used, Vagrant will auto-increment (e.g. in the case of $num_instances > 1)
 # You can then use the docker tool locally by setting the following env var:
-#   export DOCKER_HOST='tcp://127.0.0.1:2375'
+# windows
+# set DOCKER_HOST='tcp://127.0.0.1:2375'
+# linux
+# export DOCKER_HOST='tcp://127.0.0.1:2375'
 $expose_docker_tcp=2375
 
-# SHARE STUFF
-  # UNIX ONLY
-    # Enable NFS sharing of your home directory ($HOME) to CoreOS
-    # It will be mounted at the same path in the VM as on the host.
-    # Example: /Users/foobar -> /Users/foobar
-    #$share_home=false
-
-    # Share additional folders to the CoreOS VMs
-    # For example,
-    # $shared_folders = {'/path/on/host' => '/path/on/guest', '/home/foo/app' => '/app'}
-    # or, to map host folders to guest folders of the same name,
-    # $shared_folders = Hash[*['/home/foo/app1', '/home/foo/app2'].map{|d| [d, d]}.flatten]
-    #$linux_shared_folders = {}
-
-  # WINDOWS
-  # first you need to :
-  # - install cygwin WITH rsync (look in net during installation) (https://www.cygwin.com/)
-  # - add something like c:/cygwin/bin to your PATH environment var
-  $windows_shared_folders = {
-    'c:/Users/%username%/repository' => '/home/core/repository'
-  }
-
 # Enable port forwarding from guest(s) to host machine, syntax is: { 80 => 8080 }, auto correction is enabled by default.
-#$forwarded_ports = {}
+$forwarded_ports = { 80 => 9080, 443 => 4443, 1234 => 1234 }
 
 # coreos-vagrant is configured through a series of configuration
 # options (global ruby variables) which are detailed below. To modify
